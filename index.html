@@ -45,8 +45,8 @@
         e.preventDefault();
 
         if (message.value) {
-            socket.emit('send name', myname.value);
-            socket.emit('send message', message.value);
+            socket.broadcast.emit('send name', myname.value);
+            socket.broadcast.emit('send message', message.value);
             message.value = "";
         }
     });
