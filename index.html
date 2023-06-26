@@ -3,69 +3,225 @@
 
 <head>
     <title>Nody</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 </head>
 
 <body>
-    <h1 class="font-bold text-green-500 
-               text-3xl text-center mt-5">
-        ----
-    </h1>
-    <div>
-        <h2 class="font-semibold text-xl 
-                   text-center mt-5" id="logo">
-            Nody Private Chat
-        </h2>
-    </div>
-    <form class="flex flex-col justify-center 
-                 items-center mt-5" id="form">
-        <input class="border border-gray-400 
-                      rounded-md mt-5 p-1" type="text" placeholder="Name" id="myname">
-        <input class="border border-gray-400 
-                      rounded-md mt-5 p-1" type="text" placeholder="Message" id="message">
-        <button class="bg-blue-500 rounded-md p-2 
-                       text-white mt-5">
-            Send
-        </button>
-    </form>
-    <div class="flex flex-col justify-center 
-                items-center mt-5" id="messageArea">
+    <div class="container">
+        <div class="row my-2">
+            <div class="col-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Connect user</h4>
+                        <div class="mb-3">
+                            <label for="" class="form-label">User ID</label>
+                            <input type="text" class="form-control" name="" id="currentUser" aria-describedby="helpId"
+                                placeholder="">
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" onclick="ConnectUser()">connect</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Swipe Profile</h4>
+                        <div class="mb-3">
+                            <label for="" class="form-label">Swipe Of User ID</label>
+                            <input type="text" class="form-control" name="" id="swipeof" aria-describedby="helpId"
+                                placeholder="">
+                        </div>
+                        <div class="mb-3">
+                            <label for="" class="form-label">Swipe type</label>
+                            <select class="form-select form-select-lg" name="" id="swipetype">
+                                <option value="Right">Right</option>
+                                <option value="Left">Left</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" onclick="swipe()">Swipe Profile</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Like Profile</h4>
+                        <div class="mb-3">
+                            <label for="" class="form-label">Like User ID</label>
+                            <input type="text" class="form-control" name="" id="likeof" aria-describedby="helpId"
+                                placeholder="">
+                        </div>
+                        <div class="mb-3">
+                            <label for="" class="form-label">Like type</label>
+                            <select class="form-select form-select-lg" name="" id="likeType">
+                                <option value="Normalike">Norma like</option>
+                                <option value="Superlike">Super like</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" onclick="profileLike()">Like
+                            Profile</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Send Invitation</h4>
+                        <div class="mb-3">
+                            <label for="" class="form-label">Provide User ID</label>
+                            <input type="text" class="form-control" name="" id="inviteto" aria-describedby="helpId"
+                                placeholder="">
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" onclick="sendInvitation()">Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Invitations</h4>
+                        <ul class="list-inline" id="invitations">
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-4" id="chats">
+                <ul class="list-group list-group-numbered" id="messages">
+
+                </ul>
+            </div>
+        </div>
     </div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    let socket = io();
+    let invitations = [];
+    let messages = [];
+    let socket = io('http://192.168.3.2:8081/', { autoConnect: false });
 
-    let form = document.getElementById('form');
-    let myname = document.getElementById('myname');
-    let message = document.getElementById('message');
-    let messageArea = document.getElementById("messageArea");
-
-    form.addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        if (message.value) {
-            socket.broadcast.emit('send name', myname.value);
-            socket.broadcast.emit('send message', message.value);
-            message.value = "";
-        }
+    socket.on("notifySwipe", (data) => {
+        console.log(data);
+        alert("Profile Swipe ------" + JSON.stringify(data))
     });
 
-    socket.on("send name", (username) => {
-        let name = document.createElement("p");
-        name.style.backgroundColor = "grey";
-        name.style.width = "100%";
-        name.style.textAlign = "center";
-        name.style.color = "white";
-        name.textContent = username + ":";
-        messageArea.appendChild(name);
-    });
+    socket.on("notifylike", (data) => {
+        console.log(data);
+        alert("Profile Like ------" + JSON.stringify(data))
+    })
 
-    socket.on("send message", (chat) => {
-        let chatContent = document.createElement("p");
-        chatContent.textContent = chat;
-        messageArea.appendChild(chatContent);
-    });
+    socket.on("recevieMessage", (data) => {
+        messages.push(data);
+        document.getElementById("messages").innerHTML = '';
+        console.log(data);
+        messages.forEach((e) => {
+            document.getElementById("messages").innerHTML += `<li class="list-group-item">${e.message_text}</li>`
+        })
+    })
+
+    socket.on("notifyInvitation", (data) => {
+        invitations.push(data);
+        console.log(invitations);
+        document.getElementById("invitations").innerHTML = '';
+        invitations.forEach((ele) => {
+            document.getElementById("invitations").innerHTML += `<li class="list-inline-item">
+                <h1>Invited by ${ele.invited_by}</h1>
+                <button type="button" class="btn btn-outline-primary" onclick=acceptInvitation(${JSON.stringify(ele)})>
+                    Accept
+                        </button>
+                </li>`;
+        })
+    })
+
+    socket.on("notifyAccepted", (data) => {
+        // alert("Request Accepted ------" + JSON.stringify(data));
+    })
+
+    socket.on("canConversation", (data) => {
+        document.getElementById("chats").innerHTML += `<div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Send Message</h4>
+                        <div class="mb-3">
+                            <label for="" class="form-label">Send to Group ${data.name}</label>
+                            <input type="text" class="form-control" name="" id="messageText" aria-describedby="helpId"
+                                placeholder="">
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" onclick=sendMessage(${JSON.stringify(data)})>Send
+                        </button>
+                    </div>
+                </div>`;
+    })
+
+    function ConnectUser() {
+        socket.auth = { user_id: document.getElementById("currentUser").value };
+        socket.connect();
+    }
+
+    function swipe() {
+        socket.emit('profileSwipe', {
+            "user_id": document.getElementById("swipeof").value,
+            "swiped_by": document.getElementById("swipetype").value,
+            "swipe_type": document.getElementById("swipetype").value
+        });
+    }
+
+    function profileLike() {
+        socket.emit('profileLike', {
+            "user_id": document.getElementById("likeof").value,
+            "likedby": document.getElementById("currentUser").value,
+            "swipe_type": "Right",
+            "type": document.getElementById("likeType").value,
+            "dislike": true,
+            "createdby": 1,
+            "updatedby": 1
+        });
+    }
+
+
+    function sendInvitation() {
+        socket.emit('sendInvitation', {
+            "isActive": true,
+            "isAccepted": false,
+            "invited_by": document.getElementById("currentUser").value,
+            "invited_to": document.getElementById("inviteto").value,
+            "updated_by": document.getElementById("currentUser").value
+        });
+    }
+
+
+    function acceptInvitation(val) {
+        socket.emit('requestAccepted', {
+            "name": `user${val.invited_by}user${val.invited_to}`,
+            "is_active": true,
+            "user_id": val.invited_to,
+            "invited_by": val.invited_by
+        });
+    }
+
+
+    function sendMessage(grouppData) {
+        socket.emit("sendMessage", {
+            "group_name": grouppData.name,
+            "group_id": grouppData.id,
+            "sender": document.getElementById("currentUser").value,
+            "message_type": "text",
+            "message_text": document.getElementById("messageText").value,
+            "attachment_type": "text",
+            "attachment_url": null,
+            "is_deleted": false,
+            "createdby": document.getElementById("currentUser").value,
+            "updatedby": document.getElementById("currentUser").value
+        })
+    }
 </script>
 
 </html>
